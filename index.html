@@ -717,18 +717,33 @@ function getTeamNumber(teamId) {
 }
 
 function getTeamDisplay(teamId, matchupId, slot) {
-  // Check for overrides stored in matchupOverrides
   const overrides = matchupOverrides[matchupId] || {};
   const t = teams.find(t=>t.id===teamId);
   if(!t) return { names:'Unknown', pids:[] };
 
   const p1id = overrides[`${slot}_p1`] || t.player1_id;
   const p2id = overrides[`${slot}_p2`] || t.player2_id;
-  const p1 = allSelectablePlayers().find(p=>p.id===p1id);
-  const p2 = allSelectablePlayers().find(p=>p.id===p2id);
-  const n1 = p1 ? p1.name + (subs.some(s=>s.id===p1id)?' <span class="sub-tag-inline">(Sub)</span>':'') : '?';
-  const n2 = p2 ? p2.name + (subs.some(s=>s.id===p2id)?' <span class="sub-tag-inline">(Sub)</span>':'') : '?';
-  return { names: n1 + '<br>' + n2, pids: [p1id, p2id] };
+
+  const resolvePlayer = (pid) => {
+    // Check players first
+    let p = players.find(p=>p.id===pid);
+    if(p) return { player: p, isSub: false };
+    // Check subs
+    let s = subs.find(s=>s.id===pid);
+    if(s) return { player: s, isSub: true };
+    return null;
+  };
+
+  const r1 = resolvePlayer(p1id);
+  const r2 = resolvePlayer(p2id);
+  const n1 = r1 ? r1.player.name + (r1.isSub?' <span class="sub-tag-inline">(Sub)</span>':'') : players.find(p=>p.id===t.player1_id)?.name || '?';
+  const n2 = r2 ? r2.player.name + (r2.isSub?' <span class="sub-tag-inline">(Sub)</span>':'') : players.find(p=>p.id===t.player2_id)?.name || '?';
+
+  // Use original team player if override can't be resolved
+  const pid1 = r1 ? p1id : t.player1_id;
+  const pid2 = r2 ? p2id : t.player2_id;
+
+  return { names: n1 + '<br>' + n2, pids: [pid1, pid2] };
 }
 
 function selectMatchup(matchupId) {
@@ -947,8 +962,8 @@ function exitGroupScorecard() {
   selectedGroup=[];
   groupScores={};
   activeMatchupId=null;
-  subs=[];
   showSubInput=false;
+  // Note: subs and matchupOverrides intentionally kept so they persist across scorecard exits
   renderEntry();
 }
 
