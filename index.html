@@ -46,16 +46,16 @@
 
 /* SCOREBOARD TABLE */
 .scoreboard-wrap { overflow-x:auto; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.14); background:#ffffff; -webkit-overflow-scrolling:touch; }
-.scoreboard-table { width:100%; min-width:540px; border-collapse:collapse; font-size:13px; }
+.scoreboard-table { width:100%; min-width:540px; border-collapse:separate; border-spacing:0; font-size:13px; }
 .scoreboard-table thead { background:#1a3a2a; }
 .scoreboard-table thead th { padding:10px 7px; font-size:11px; font-weight:600; letter-spacing:0.06em; text-align:center; color:#f5f0e8; }
-.scoreboard-table thead th.name-col { text-align:left; padding-left:14px; min-width:130px; }
+.scoreboard-table thead th.name-col { text-align:left; padding-left:14px; min-width:130px; position:sticky; left:0; z-index:3; background:#1a3a2a; }
 .par-row td { background:#3d7a52; color:#f5f0e8; font-size:12px; font-weight:600; text-align:center; padding:6px 7px; border-bottom:2px solid #1a3a2a; }
-.par-row td.name-col { text-align:left; padding-left:14px; font-size:11px; letter-spacing:0.07em; text-transform:uppercase; color:rgba(245,240,232,0.75); }
+.par-row td.name-col { text-align:left; padding-left:14px; font-size:11px; letter-spacing:0.07em; text-transform:uppercase; color:rgba(245,240,232,0.75); position:sticky; left:0; z-index:2; background:#3d7a52; box-shadow:2px 0 4px rgba(0,0,0,0.1); }
 .player-row { border-bottom:1px solid #e8e0d0; }
 .player-row:last-child { border-bottom:none; }
 .player-row td { padding:10px 7px; text-align:center; font-size:13px; }
-.player-row td.name-col { text-align:left; padding-left:14px; }
+.player-row td.name-col { text-align:left; padding-left:14px; position:sticky; left:0; z-index:2; background:#ffffff; box-shadow:2px 0 4px rgba(0,0,0,0.06); }
 .p-name { font-size:14px; font-weight:700; color:#1a3a2a; }
 .p-status { font-size:10px; color:#aaa; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px; }
 .p-status.active { color:#3d7a52; }
@@ -93,6 +93,35 @@ position:relative; -webkit-appearance:none; transition:all 0.15s;
 .player-btn.selected.has-scores::after { color:#c9a84c; }
 .player-btn.disabled-btn { opacity:0.35; cursor:not-allowed; }
 
+.sub-btn {
+padding:13px 10px; background:transparent; border:2px solid #c9a84c; border-radius:10px;
+font-family:-apple-system,BlinkMacSystemFont,‘Segoe UI’,Helvetica,Arial,sans-serif;
+font-size:14px; font-weight:700; color:#c9a84c; cursor:pointer; text-align:center;
+position:relative; -webkit-appearance:none; transition:all 0.15s;
+}
+.sub-btn:active { background:#fff8e8; }
+.sub-btn.selected { background:#c9a84c; color:#1a3a2a; }
+.sub-input-row { display:flex; gap:8px; align-items:center; margin-top:8px; grid-column:1/-1; }
+.sub-input {
+flex:1; padding:11px 12px; border:2px solid #c9a84c; border-radius:10px;
+font-family:-apple-system,BlinkMacSystemFont,‘Segoe UI’,Helvetica,Arial,sans-serif;
+font-size:14px; background:#fffdf5; color:#1a3a2a; outline:none; -webkit-appearance:none;
+}
+.sub-input:focus { border-color:#b8923e; }
+.sub-add-btn {
+padding:11px 16px; background:#c9a84c; color:#1a3a2a; border:none; border-radius:10px;
+font-family:-apple-system,BlinkMacSystemFont,‘Segoe UI’,Helvetica,Arial,sans-serif;
+font-size:14px; font-weight:700; cursor:pointer; -webkit-appearance:none; white-space:nowrap;
+}
+.sub-add-btn:active { background:#b8923e; }
+.sub-tag {
+display:inline-flex; align-items:center; gap:6px; background:#fff8e8; border:1.5px solid #c9a84c;
+border-radius:20px; padding:5px 10px 5px 12px; font-size:13px; font-weight:600; color:#1a3a2a;
+margin:4px 4px 0 0;
+}
+.sub-tag-remove { background:none; border:none; color:#c9a84c; font-size:16px; cursor:pointer; padding:0; line-height:1; font-weight:700; }
+.sub-tags-wrap { grid-column:1/-1; display:flex; flex-wrap:wrap; margin-top:4px; min-height:0; }
+
 .start-group-btn {
 width:100%; padding:14px; background:#c9a84c; color:#1a3a2a; border:none; border-radius:10px;
 font-family:-apple-system,BlinkMacSystemFont,‘Segoe UI’,Helvetica,Arial,sans-serif;
@@ -120,20 +149,27 @@ overflow-x:auto; background:#ffffff; border-radius:0 0 12px 12px;
 box-shadow:0 4px 20px rgba(0,0,0,0.14); margin-bottom:16px;
 -webkit-overflow-scrolling:touch;
 }
-.sc-table { border-collapse:collapse; font-size:13px; width:100%; }
+.sc-table { border-collapse:separate; border-spacing:0; font-size:13px; width:100%; }
 
 /* Column widths */
-.sc-table .col-label { min-width:72px; width:72px; }
-.sc-table .col-hole  { min-width:34px; width:34px; }
-.sc-table .col-tot   { min-width:46px; width:46px; }
+.sc-table .col-label { min-width:90px; width:90px; }
+.sc-table .col-hole  { min-width:38px; width:38px; }
+.sc-table .col-tot   { min-width:50px; width:50px; }
+
+/* Frozen first column — all lbl-cell variants */
+.sc-table td.lbl-cell,
+.sc-table th.lbl-cell {
+position:sticky; left:0; z-index:2;
+}
 
 /* Header row - hole numbers */
 .sc-table .row-holes th {
 background:#1a3a2a; color:#f5f0e8; text-align:center;
 padding:8px 4px; font-size:12px; font-weight:700; letter-spacing:0.04em;
 border-right:1px solid rgba(255,255,255,0.08);
+position:sticky; top:0; z-index:1;
 }
-.sc-table .row-holes th.lbl-cell { text-align:left; padding-left:10px; }
+.sc-table .row-holes th.lbl-cell { text-align:left; padding-left:10px; z-index:3; }
 .sc-table .row-holes th.tot-cell { background:#0f2419; }
 
 /* Yardage rows */
@@ -153,7 +189,7 @@ background:#2d5a3d; color:#f5f0e8; text-align:center;
 padding:6px 4px; font-size:13px; font-weight:700;
 border-right:1px solid rgba(255,255,255,0.15); border-bottom:2px solid #1a3a2a;
 }
-.sc-table .row-par td.lbl-cell { text-align:left; padding-left:10px; font-size:11px; letter-spacing:0.07em; text-transform:uppercase; }
+.sc-table .row-par td.lbl-cell { text-align:left; padding-left:10px; font-size:11px; letter-spacing:0.07em; text-transform:uppercase; background:#2d5a3d; }
 .sc-table .row-par td.tot-cell { background:#1a3a2a; }
 
 /* Hdcp row */
@@ -162,7 +198,7 @@ background:#f0ebe0; color:#666; text-align:center;
 padding:5px 4px; font-size:11px; font-weight:600;
 border-right:1px solid #e8e0d0; border-bottom:2px solid #1a3a2a;
 }
-.sc-table .row-hdcp td.lbl-cell { text-align:left; padding-left:10px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#888; }
+.sc-table .row-hdcp td.lbl-cell { text-align:left; padding-left:10px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#888; background:#f0ebe0; }
 .sc-table .row-hdcp td.tot-cell { background:#e8e0d0; }
 
 /* Player rows */
@@ -174,6 +210,7 @@ border-right:1px solid #e8e0d0; border-bottom:1px solid #e8e0d0;
 .sc-table .row-player td.lbl-cell {
 text-align:left; padding-left:10px; background:#fafaf8;
 font-size:13px; font-weight:700; color:#1a3a2a; white-space:nowrap;
+box-shadow:2px 0 4px rgba(0,0,0,0.06);
 }
 .sc-table .row-player td.tot-cell { background:#f5f0e8; font-size:13px; font-weight:800; }
 
@@ -293,6 +330,39 @@ font-size:13px; font-weight:600; cursor:pointer; -webkit-appearance:none;
 .scoreboard-wrap::-webkit-scrollbar-thumb { background:#3d7a52; border-radius:2px; }
 .scorecard-wrap::-webkit-scrollbar { height:4px; }
 .scorecard-wrap::-webkit-scrollbar-thumb { background:#3d7a52; border-radius:2px; }
+
+/* MATCHUP CARDS */
+.matchup-card {
+background:#ffffff; border-radius:14px; padding:16px 18px;
+box-shadow:0 4px 20px rgba(0,0,0,0.1); margin-bottom:12px;
+cursor:pointer; border:2px solid transparent; transition:border-color 0.15s;
+}
+.matchup-card:active { border-color:#c9a84c; }
+.matchup-card-header { font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:#aaa; font-weight:600; margin-bottom:10px; }
+.matchup-teams { display:flex; align-items:center; gap:10px; }
+.matchup-team { flex:1; }
+.matchup-team-num { font-size:10px; color:#aaa; font-family:monospace; margin-bottom:2px; }
+.matchup-team-players { font-size:14px; font-weight:700; color:#1a3a2a; line-height:1.4; }
+.matchup-team-players .sub-tag-inline { font-size:11px; color:#c9a84c; font-weight:600; }
+.matchup-vs { font-size:13px; font-weight:800; color:#c9a84c; padding:0 4px; }
+.matchup-progress { margin-top:10px; font-size:11px; color:#aaa; display:flex; gap:6px; flex-wrap:wrap; }
+.matchup-progress span { background:#f5f0e8; border-radius:10px; padding:2px 8px; }
+.matchup-progress span.has-score { background:rgba(61,122,82,0.12); color:#3d7a52; font-weight:600; }
+
+/* ADMIN MATCHUP */
+.matchup-setup-block { border:1.5px solid #e8e0d0; border-radius:10px; padding:14px; margin-bottom:10px; }
+.matchup-setup-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.matchup-setup-row:last-child { margin-bottom:0; }
+.matchup-num-badge { background:#1a3a2a; color:#c9a84c; border-radius:6px; padding:4px 8px; font-size:12px; font-weight:700; white-space:nowrap; }
+.matchup-team-select { flex:1; padding:9px 10px; border:1.5px solid #e8e0d0; border-radius:8px; font-family:-apple-system,BlinkMacSystemFont,‘Segoe UI’,Helvetica,Arial,sans-serif; font-size:13px; background:#f5f0e8; color:#1a3a2a; outline:none; -webkit-appearance:none; }
+.matchup-team-select:focus { border-color:#3d7a52; }
+
+/* PLAYER OVERRIDE IN MATCHUP */
+.override-block { background:#f5f0e8; border-radius:10px; padding:12px; margin-bottom:10px; }
+.override-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.override-row:last-child { margin-bottom:0; }
+.override-label { font-size:13px; font-weight:600; color:#1a3a2a; min-width:120px; }
+.override-select { flex:1; padding:8px 10px; border:1.5px solid #e8e0d0; border-radius:8px; font-family:-apple-system,BlinkMacSystemFont,‘Segoe UI’,Helvetica,Arial,sans-serif; font-size:13px; background:#ffffff; color:#1a3a2a; outline:none; -webkit-appearance:none; }
 </style>
 
 </head>
@@ -373,17 +443,24 @@ const COURSE_DATA = {
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let activeSeason  = null;
-let activeRound   = null;
-let activeCourse  = null;
-let players       = [];
-let scoreMap      = {};
-let adminUnlocked = false;
+let activeSeason     = null;
+let activeRound      = null;  // the display round
+let activeCourse     = null;
+let allActiveRounds  = [];    // all rounds with status=active
+let closedRounds     = [];    // all rounds with status=closed
+let players          = [];
+let scoreMap         = {};
+let adminUnlocked    = false;
+
+// Teams & matchups
+let teams    = [];   // { id, team_number, player1_id, player2_id }
+let matchups = [];   // { id, round_id, team1_id, team2_id } for active round
 
 // Group entry state
-let groupMode      = false;  // false = player select, true = scorecard
+let groupMode      = false;  // false = matchup select, true = scorecard
 let selectedGroup  = [];     // array of player ids
 let groupScores    = {};     // { playerId: { hole: strokes } }
+let activeMatchupId = null;  // matchup being scored
 
 // Popover state
 let popPlayerId = null;
@@ -413,16 +490,12 @@ async function init() {
     activeSeason = seasons?.[0] || null;
     const { data: pl } = await sb.from('players').select('*').eq('active',true).order('name');
     players = pl || [];
+    const { data: pastSubs } = await sb.from('players').select('*').eq('active',false).order('name');
+    subs = (pastSubs || []).map(p => ({ id: p.id, name: p.name, fromDb: true }));
+    const { data: tm } = await sb.from('teams').select('*').order('team_number');
+    teams = tm || [];
     if (activeSeason) {
-      const { data: rounds } = await sb.from('rounds')
-        .select('*, courses(*)')
-        .eq('season_id', activeSeason.id)
-        .eq('status','active').limit(1);
-      if (rounds?.[0]) {
-        activeRound  = rounds[0];
-        activeCourse = rounds[0].courses;
-        await loadScores();
-      }
+      await loadAllRounds();
     }
     subscribeRealtime();
     updateBadge();
@@ -431,14 +504,47 @@ async function init() {
   finally { document.getElementById('loadingOverlay').classList.add('hidden'); }
 }
 
+async function loadAllRounds() {
+  if (!activeSeason) return;
+  // Load all active rounds
+  const { data: active } = await sb.from('rounds')
+    .select('*, courses(*)')
+    .eq('season_id', activeSeason.id)
+    .eq('status','active')
+    .order('date', { ascending: false });
+  allActiveRounds = active || [];
+
+  // Load all closed rounds
+  const { data: closed } = await sb.from('rounds')
+    .select('*, courses(*)')
+    .eq('season_id', activeSeason.id)
+    .eq('status','closed')
+    .order('date', { ascending: false });
+  closedRounds = closed || [];
+
+  // Set display round from season's display_round_id
+  const displayId = activeSeason.display_round_id;
+  if (displayId) {
+    const found = allActiveRounds.find(r=>r.id===displayId);
+    if (found) { activeRound=found; activeCourse=found.courses; }
+    else { activeRound=null; activeCourse=null; }
+  } else {
+    activeRound=null; activeCourse=null;
+  }
+  await loadScores();
+}
+
 async function loadScores() {
-  if (!activeRound) { scoreMap={}; return; }
+  if (!activeRound) { scoreMap={}; matchups=[]; return; }
   const { data } = await sb.from('scores').select('*').eq('round_id',activeRound.id);
   scoreMap = {};
   (data||[]).forEach(s => {
     if (!scoreMap[s.player_id]) scoreMap[s.player_id]={};
     scoreMap[s.player_id][s.hole] = s.strokes;
   });
+  // Load matchups for this round
+  const { data: mx } = await sb.from('matchups').select('*').eq('round_id',activeRound.id).order('created_at');
+  matchups = mx || [];
   // Sync into groupScores if group is active
   if (groupMode && selectedGroup.length>0) {
     selectedGroup.forEach(pid => {
@@ -462,19 +568,17 @@ function subscribeRealtime() {
 
 async function reloadRound() {
   if (!activeSeason) return;
-  const { data: rounds } = await sb.from('rounds')
-    .select('*, courses(*)')
-    .eq('season_id',activeSeason.id).eq('status','active').limit(1);
-  if (rounds?.[0]) {
-    activeRound=rounds[0]; activeCourse=rounds[0].courses;
-    await loadScores();
-  } else { activeRound=null; activeCourse=null; scoreMap={}; }
+  // Refresh season to get latest display_round_id
+  const { data: seasons } = await sb.from('seasons').select('*').eq('id', activeSeason.id).limit(1);
+  if (seasons?.[0]) activeSeason = seasons[0];
+  await loadAllRounds();
   updateBadge(); renderAll();
 }
 
 function updateBadge() {
   const b = document.getElementById('roundBadge');
   if (activeRound) { b.textContent='Live'; b.className='round-badge live'; }
+  else if (allActiveRounds.length>0) { b.textContent='No Display'; b.className='round-badge no-round'; }
   else { b.textContent='No Round'; b.className='round-badge no-round'; }
 }
 
@@ -563,29 +667,179 @@ function renderEntry() {
     return;
   }
   if (groupMode) { renderGroupScorecard(); return; }
+  if (matchups.length>0) { renderMatchupList(); return; }
   renderPlayerSelect();
+}
+
+function renderMatchupList() {
+  const el = document.getElementById('entryContent');
+
+  const cards = matchups.map((m,i) => {
+    const t1 = getTeamDisplay(m.team1_id, m.id, 1);
+    const t2 = getTeamDisplay(m.team2_id, m.id, 2);
+    const allPids = [...t1.pids, ...t2.pids];
+    const progress = allPids.map(pid => {
+      const holes = scoreMap[pid]||{};
+      const count = Object.keys(holes).length;
+      const p = allSelectablePlayers().find(x=>x.id===pid);
+      const name = p ? p.name.split(' ')[0] : '?';
+      return `<span class="${count>0?'has-score':''}">${name}: ${count}/9</span>`;
+    }).join('');
+
+    return `<div class="matchup-card" onclick="selectMatchup('${m.id}')">
+      <div class="matchup-card-header">Matchup ${i+1}</div>
+      <div class="matchup-teams">
+        <div class="matchup-team">
+          <div class="matchup-team-num">Team ${getTeamNumber(m.team1_id)}</div>
+          <div class="matchup-team-players">${t1.names}</div>
+        </div>
+        <div class="matchup-vs">vs</div>
+        <div class="matchup-team">
+          <div class="matchup-team-num">Team ${getTeamNumber(m.team2_id)}</div>
+          <div class="matchup-team-players">${t2.names}</div>
+        </div>
+      </div>
+      <div class="matchup-progress">${progress}</div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="round-info">
+      <div><div class="round-course">Boulder Pointe — ${activeCourse.name}</div><div class="round-date">${fmtDate(activeRound.date)}</div></div>
+    </div>
+    ${cards}
+    <div style="text-align:center;margin-top:4px;">
+      <button class="change-link" style="font-size:13px;color:#aaa;" onclick="renderPlayerSelect()">Enter without a matchup</button>
+    </div>`;
+}
+
+function getTeamNumber(teamId) {
+  const t = teams.find(t=>t.id===teamId);
+  return t ? t.team_number : '?';
+}
+
+function getTeamDisplay(teamId, matchupId, slot) {
+  const overrides = matchupOverrides[matchupId] || {};
+  const t = teams.find(t=>t.id===teamId);
+  if(!t) return { names:'Unknown', pids:[] };
+
+  const p1id = overrides[`${slot}_p1`] || t.player1_id;
+  const p2id = overrides[`${slot}_p2`] || t.player2_id;
+
+  const resolvePlayer = (pid) => {
+    // Check players first
+    let p = players.find(p=>p.id===pid);
+    if(p) return { player: p, isSub: false };
+    // Check subs
+    let s = subs.find(s=>s.id===pid);
+    if(s) return { player: s, isSub: true };
+    return null;
+  };
+
+  const r1 = resolvePlayer(p1id);
+  const r2 = resolvePlayer(p2id);
+  const isSubId = (id) => subs.some(s=>s.id===id) || !players.some(p=>p.id===id);
+  const n1 = r1 ? r1.player.name + (isSubId(pid1)?' <span class="sub-tag-inline">(Sub)</span>':'') : players.find(p=>p.id===t.player1_id)?.name || '?';
+  const n2 = r2 ? r2.player.name + (isSubId(pid2)?' <span class="sub-tag-inline">(Sub)</span>':'') : players.find(p=>p.id===t.player2_id)?.name || '?';
+
+  // Use original team player if override can't be resolved
+  const pid1 = r1 ? p1id : t.player1_id;
+  const pid2 = r2 ? p2id : t.player2_id;
+
+  return { names: n1 + '<br>' + n2, pids: [pid1, pid2] };
+}
+
+function selectMatchup(matchupId) {
+  const m = matchups.find(x=>x.id===matchupId);
+  if(!m) return;
+  activeMatchupId = matchupId;
+  const t1 = getTeamDisplay(m.team1_id, matchupId, 1);
+  const t2 = getTeamDisplay(m.team2_id, matchupId, 2);
+  selectedGroup = [...t1.pids, ...t2.pids];
+  // Init groupScores from scoreMap
+  selectedGroup.forEach(pid => {
+    groupScores[pid] = { ...(scoreMap[pid]||{}) };
+  });
+  groupMode = true;
+  renderGroupScorecard();
+}
+
+// Sub state
+let showSubInput = false;
+let subs = []; // { id, name } — temp only, not in players array
+let matchupOverrides = {}; // { matchupId: { '1_p1': playerId, '1_p2': playerId, '2_p1': playerId, '2_p2': playerId } }
+
+function allSelectablePlayers() {
+  // Merge active players + subs, avoiding duplicates
+  const activeIds = new Set(players.map(p=>p.id));
+  const subsNotInActive = subs.filter(s=>!activeIds.has(s.id));
+  return [...players, ...subsNotInActive];
 }
 
 function renderPlayerSelect() {
   const el = document.getElementById('entryContent');
-  let btns='';
-  players.forEach(p=>{
-    const isSelected = selectedGroup.includes(p.id);
-    const has = scoreMap[p.id]&&Object.keys(scoreMap[p.id]).length>0;
-    const maxed = selectedGroup.length>=4 && !isSelected;
-    btns+=`<button class="player-btn ${isSelected?'selected':''} ${has?'has-scores':''} ${maxed?'disabled-btn':''}"
-      onclick="togglePlayer('${p.id}')" ${maxed?'disabled':''}>${p.name}</button>`;
-  });
+  const all = allSelectablePlayers();
   const count = selectedGroup.length;
+  const maxed = count >= 4;
+
+  let btns='';
+  all.forEach(p=>{
+    const isSelected = selectedGroup.includes(p.id);
+    const isSub = subs.some(s=>s.id===p.id);
+    const has = !isSub && scoreMap[p.id]&&Object.keys(scoreMap[p.id]).length>0;
+    const disabled = maxed && !isSelected;
+    if(isSub){
+      btns+=`<button class="player-btn ${isSelected?'selected':''} ${disabled?'disabled-btn':''}"
+        onclick="togglePlayer('${p.id}')" ${disabled?'disabled':''}>${p.name} <span style="font-size:10px;opacity:0.6">(Sub)</span></button>`;
+    } else {
+      btns+=`<button class="player-btn ${isSelected?'selected':''} ${has?'has-scores':''} ${disabled?'disabled-btn':''}"
+        onclick="togglePlayer('${p.id}')" ${disabled?'disabled':''}>${p.name}</button>`;
+    }
+  });
+
+  // Sub button
+  const subDisabled = maxed && !showSubInput ? 'disabled' : '';
+  btns+=`<button class="sub-btn ${showSubInput?'selected':''}" onclick="toggleSubInput()" ${subDisabled}>+ Add Sub</button>`;
+
+  const subInputHtml = showSubInput ? `
+    <div class="sub-input-row">
+      <input class="sub-input" id="subNameInput" type="text" placeholder="Sub's name" maxlength="40"
+        onkeydown="if(event.key==='Enter')addSub()">
+      <button class="sub-add-btn" onclick="addSub()">Add</button>
+    </div>` : '';
+
   el.innerHTML=`
     <div class="card">
       <div class="section-label">Select Your Group (up to 4)</div>
-      <div class="player-grid" id="playerGrid">${btns}</div>
+      <div class="player-grid" id="playerGrid">
+        ${btns}
+        ${subInputHtml}
+      </div>
     </div>
     <button class="start-group-btn" onclick="startGroupScorecard()" ${count===0?'disabled':''}>
       Start Scorecard${count>0?' ('+count+' player'+(count>1?'s':'')+')':''}
     </button>
     <div class="group-hint">${count===0?'Tap players to select your group':'Tap Start Scorecard to begin entering scores'}</div>`;
+
+  if(showSubInput) setTimeout(()=>{ const i=document.getElementById('subNameInput'); if(i) i.focus(); },50);
+}
+
+function toggleSubInput() {
+  showSubInput = !showSubInput;
+  renderPlayerSelect();
+}
+
+function addSub() {
+  const input = document.getElementById('subNameInput');
+  if(!input) return;
+  const name = input.value.trim();
+  if(!name) return;
+  if(selectedGroup.length>=4) return;
+  const id = 'sub_' + Date.now();
+  subs.push({ id, name });
+  selectedGroup.push(id);
+  showSubInput = false;
+  renderPlayerSelect();
 }
 
 function togglePlayer(id) {
@@ -599,12 +853,12 @@ function togglePlayer(id) {
 
 function startGroupScorecard() {
   if (selectedGroup.length===0) return;
-  // Init groupScores from existing scoreMap
   groupScores={};
   selectedGroup.forEach(pid=>{
     groupScores[pid] = { ...(scoreMap[pid]||{}) };
   });
   groupMode=true;
+  showSubInput=false;
   renderGroupScorecard();
 }
 
@@ -613,7 +867,7 @@ function renderGroupScorecard() {
   const cd  = courseData();
   if (!cd) return;
 
-  const groupPlayers = selectedGroup.map(id=>players.find(p=>p.id===id)).filter(Boolean);
+  const groupPlayers = selectedGroup.map(id=>allSelectablePlayers().find(p=>p.id===id)).filter(Boolean);
 
   // Build table
   let hdrCells = `<th class="lbl-cell col-label">HOLE</th>`;
@@ -713,6 +967,9 @@ function exitGroupScorecard() {
   groupMode=false;
   selectedGroup=[];
   groupScores={};
+  activeMatchupId=null;
+  showSubInput=false;
+  // Note: subs and matchupOverrides intentionally kept so they persist across scorecard exits
   renderEntry();
 }
 
@@ -757,7 +1014,6 @@ function popAdj(delta) {
 async function savePopover() {
   if (!groupScores[popPlayerId]) groupScores[popPlayerId]={};
   groupScores[popPlayerId][popHole] = popStrokes;
-  // Upsert to Supabase
   await sb.from('scores').upsert(
     { round_id:activeRound.id, player_id:popPlayerId, hole:popHole, strokes:popStrokes },
     { onConflict:'round_id,player_id,hole' }
@@ -814,9 +1070,133 @@ async function loadAdminPanel() {
   if (!panel) return;
   const opts = (courses||[]).map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   const today = new Date().toISOString().slice(0,10);
-  const activeBox = activeRound
-    ? `<div class="active-round-box"><div class="arb-label">Current Active Round</div><div class="arb-val">Boulder Pointe — ${activeCourse.name}</div><div class="arb-date">${fmtDate(activeRound.date)}</div></div>`
-    : `<div class="active-round-box" style="opacity:0.5"><div class="arb-label">No Active Round</div></div>`;
+
+  // Display round selector — all active rounds
+  const displayOpts = allActiveRounds.map(r=>
+    `<option value="${r.id}" ${activeRound&&r.id===activeRound.id?'selected':''}>
+      ${r.courses.name} — ${fmtDate(r.date)}
+    </option>`
+  ).join('');
+  const displaySelector = allActiveRounds.length>0
+    ? `<select class="admin-select" id="displayRoundSelect">${displayOpts}</select>
+       <button class="btn-full" onclick="setDisplayRound()" style="margin-top:10px;">Set Display Round</button>
+       <div class="admin-msg" id="displayMsg"></div>`
+    : `<div style="font-size:13px;color:#aaa;padding:8px 0;">No active rounds yet.</div>`;
+
+  // Active rounds list
+  const activeRoundsList = allActiveRounds.length>0
+    ? allActiveRounds.map(r=>`
+        <div class="active-round-box" style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div class="arb-val">Boulder Pointe — ${r.courses.name}</div>
+              <div class="arb-date">${fmtDate(r.date)} ${activeRound&&r.id===activeRound.id?'<span style="color:#27ae60;font-weight:700;">● Display</span>':''}</div>
+            </div>
+            <button class="btn-danger-full" style="width:auto;margin:0;padding:8px 14px;font-size:13px;" onclick="closeRound('${r.id}')">Close</button>
+          </div>
+        </div>`).join('')
+    : `<div style="font-size:13px;color:#aaa;padding:8px 0;">No active rounds.</div>`;
+
+  // Closed rounds list
+  const closedRoundsList = closedRounds.length>0
+    ? closedRounds.map(r=>`
+        <div class="active-round-box" style="margin-bottom:10px;opacity:0.75;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div class="arb-val" style="font-size:14px;">Boulder Pointe — ${r.courses.name}</div>
+              <div class="arb-date">${fmtDate(r.date)}</div>
+            </div>
+            <button class="btn-full" style="width:auto;margin:0;padding:8px 14px;font-size:13px;" onclick="reactivateRound('${r.id}')">Reactivate</button>
+          </div>
+        </div>`).join('')
+    : `<div style="font-size:13px;color:#aaa;padding:8px 0;">No closed rounds.</div>`;
+
+  // Build matchup setup section
+  const teamOpts = teams.map(t=>{
+    const p1 = players.find(p=>p.id===t.player1_id);
+    const p2 = players.find(p=>p.id===t.player2_id);
+    const label = `Team ${t.team_number}: ${p1?p1.name.split(' ')[0]:'?'} & ${p2?p2.name.split(' ')[0]:'?'}`;
+    return `<option value="${t.id}">${label}</option>`;
+  }).join('');
+
+  const matchupSetupRows = [1,2,3,4,5,6].map(i=>{
+    const existing = matchups[i-1];
+    const t1sel = existing ? `value="${existing.team1_id}"` : '';
+    const t2sel = existing ? `value="${existing.team2_id}"` : '';
+    const t1opts = teams.map(t=>{
+      const p1=players.find(p=>p.id===t.player1_id), p2=players.find(p=>p.id===t.player2_id);
+      const sel = existing&&existing.team1_id===t.id?'selected':'';
+      return `<option value="${t.id}" ${sel}>Team ${t.team_number}: ${p1?p1.name.split(' ')[0]:'?'} & ${p2?p2.name.split(' ')[0]:'?'}</option>`;
+    }).join('');
+    const t2opts = teams.map(t=>{
+      const p1=players.find(p=>p.id===t.player1_id), p2=players.find(p=>p.id===t.player2_id);
+      const sel = existing&&existing.team2_id===t.id?'selected':'';
+      return `<option value="${t.id}" ${sel}>Team ${t.team_number}: ${p1?p1.name.split(' ')[0]:'?'} & ${p2?p2.name.split(' ')[0]:'?'}</option>`;
+    }).join('');
+    return `<div class="matchup-setup-block">
+      <div class="matchup-setup-row">
+        <span class="matchup-num-badge">M${i}</span>
+        <select class="matchup-team-select" id="m${i}t1"><option value="">-- Team --</option>${t1opts}</select>
+        <span style="font-size:13px;font-weight:700;color:#aaa;">vs</span>
+        <select class="matchup-team-select" id="m${i}t2"><option value="">-- Team --</option>${t2opts}</select>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Build player override section for existing matchups
+  let overrideSection = '';
+  if (matchups.length>0 && activeRound) {
+    const overrideRows = matchups.map((m,i)=>{
+      const t1 = teams.find(t=>t.id===m.team1_id);
+      const t2 = teams.find(t=>t.id===m.team2_id);
+      if(!t1||!t2) return '';
+      const allPlayerOpts = players.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+      const subOpts = subs.map(s=>`<option value="${s.id}">${s.name} (Sub)</option>`).join('');
+      const allOpts = `${allPlayerOpts}${subOpts}`;
+      const ov = matchupOverrides[m.id]||{};
+
+      const makeRow = (slot, pid, label) => {
+        const currentId = ov[slot] || pid;
+        const isSubSelected = subs.some(s=>s.id===currentId);
+        const regularOpts = players.map(p=>`<option value="${p.id}" ${currentId===p.id&&!isSubSelected?'selected':''}>${p.name}</option>`).join('');
+        const subOpts = subs.map(s=>`<option value="${s.id}" ${currentId===s.id?'selected':''}>${s.name} (Sub)</option>`).join('');
+        return `<div class="override-row" style="flex-wrap:wrap;gap:6px;">
+          <div class="override-label">${label}</div>
+          <select class="override-select" onchange="setOverride('${m.id}','${slot}',this.value)">
+            ${regularOpts}
+            ${subOpts.length?'<optgroup label="Subs">'+subOpts+'</optgroup>':''}
+            <option value="__add_sub__">＋ Add Sub...</option>
+          </select>
+          <div id="subInput_${m.id}_${slot}" style="display:none;width:100%;display:none;flex:1 1 100%;margin-top:4px;">
+            <div style="display:flex;gap:6px;">
+              <input type="text" placeholder="Sub name" maxlength="40"
+                style="flex:1;padding:8px 10px;border:1.5px solid #c9a84c;border-radius:8px;font-size:13px;background:#fffdf5;outline:none;"
+                id="subInputField_${m.id}_${slot}"
+                onkeydown="if(event.key==='Enter')confirmSub('${m.id}','${slot}')">
+              <button onclick="confirmSub('${m.id}','${slot}')"
+                style="padding:8px 12px;background:#c9a84c;color:#1a3a2a;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">Add</button>
+            </div>
+          </div>
+        </div>`;
+      };
+      const p1=players.find(p=>p.id===t1.player1_id), p2=players.find(p=>p.id===t1.player2_id);
+      const p3=players.find(p=>p.id===t2.player1_id), p4=players.find(p=>p.id===t2.player2_id);
+      return `<div class="override-block">
+        <div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Matchup ${i+1}</div>
+        ${makeRow('1_p1', t1.player1_id, p1?p1.name:'Player 1')}
+        ${makeRow('1_p2', t1.player2_id, p2?p2.name:'Player 2')}
+        ${makeRow('2_p1', t2.player1_id, p3?p3.name:'Player 3')}
+        ${makeRow('2_p2', t2.player2_id, p4?p4.name:'Player 4')}
+      </div>`;
+    }).join('');
+    overrideSection = `<div class="admin-card"><h3>Edit Matchup Players</h3><p style="font-size:12px;color:#aaa;margin-bottom:12px;">Swap in subs or fix player assignments</p>${overrideRows}</div>`;
+  }
+
+  const pastSubsHtml = subs.length > 0
+    ? '<div style="font-size:12px;color:#aaa;margin-bottom:10px;">Players who have subbed previously</div>' +
+      subs.map(s=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0ebe0;"><span style="font-size:14px;font-weight:600;color:#1a3a2a;">'+s.name+'</span><span style="font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:0.06em;">Sub</span></div>').join('')
+    : '<div style="font-size:13px;color:#aaa;">No past subs yet.</div>';
+
   panel.innerHTML=`
     <div class="admin-card">
       <h3>Start New Round</h3>
@@ -828,11 +1208,105 @@ async function loadAdminPanel() {
       <div class="admin-msg" id="startMsg"></div>
     </div>
     <div class="admin-card">
-      <h3>Active Round</h3>
-      ${activeBox}
-      <button class="btn-danger-full" onclick="closeRound()" ${!activeRound?'disabled':''}>Close Active Round</button>
-      <div class="admin-msg" id="closeMsg"></div>
-    </div>`;
+      <h3>Display Round</h3>
+      <div class="field-label" style="margin-top:0;">Shown on scoreboard &amp; score entry</div>
+      ${displaySelector}
+    </div>
+    <div class="admin-card">
+      <h3>Active Rounds</h3>
+      ${activeRoundsList}
+    </div>
+    <div class="admin-card">
+      <h3>Closed Rounds</h3>
+      ${closedRoundsList}
+    </div>
+    <div class="admin-card">
+      <h3>Past Subs</h3>
+      ${pastSubsHtml}
+    </div>
+    ${activeRound ? `
+    <div class="admin-card">
+      <h3>Set Matchups</h3>
+      <p style="font-size:12px;color:#aaa;margin-bottom:12px;">Set the 6 matchups for the active round</p>
+      ${matchupSetupRows}
+      <button class="btn-full" onclick="saveMatchups()">Save Matchups</button>
+      <div class="admin-msg" id="matchupMsg"></div>
+    </div>
+    ${overrideSection}` : ''}`;
+}
+
+async function saveMatchups() {
+  if(!activeRound) return;
+  const msg = document.getElementById('matchupMsg');
+  const rows = [];
+  for(let i=1;i<=6;i++){
+    const t1 = document.getElementById(`m${i}t1`)?.value;
+    const t2 = document.getElementById(`m${i}t2`)?.value;
+    if(t1&&t2&&t1!==t2) rows.push({ round_id:activeRound.id, team1_id:t1, team2_id:t2 });
+  }
+  if(rows.length===0){ msg.textContent='Add at least one matchup.'; msg.className='admin-msg err'; return; }
+  // Delete existing matchups for this round and re-insert
+  await sb.from('matchups').delete().eq('round_id', activeRound.id);
+  const { error } = await sb.from('matchups').insert(rows);
+  if(error){ msg.textContent='Error saving matchups.'; msg.className='admin-msg err'; }
+  else {
+    msg.textContent=`${rows.length} matchups saved!`; msg.className='admin-msg ok';
+    await loadScores();
+    loadAdminPanel();
+    toast('Matchups saved ✓');
+  }
+}
+
+function setOverride(matchupId, slot, playerId) {
+  if (playerId === '__add_sub__') {
+    // Show the sub input for this slot
+    const inputDiv = document.getElementById(`subInput_${matchupId}_${slot}`);
+    if (inputDiv) {
+      inputDiv.style.display = 'flex';
+      const field = document.getElementById(`subInputField_${matchupId}_${slot}`);
+      if (field) setTimeout(()=>field.focus(), 50);
+    }
+    return;
+  }
+  if(!matchupOverrides[matchupId]) matchupOverrides[matchupId]={};
+  matchupOverrides[matchupId][slot] = playerId;
+}
+
+async function confirmSub(matchupId, slot) {
+  const field = document.getElementById(`subInputField_${matchupId}_${slot}`);
+  if (!field) return;
+  const name = field.value.trim();
+  if (!name) return;
+
+  // Check if player already exists (active or inactive)
+  const { data: existing } = await sb.from('players')
+    .select('*')
+    .ilike('name', name)
+    .limit(1);
+
+  let playerId;
+  if (existing && existing.length > 0) {
+    // Reuse existing record
+    playerId = existing[0].id;
+    if (!subs.some(s => s.id === playerId)) {
+      subs.push({ id: playerId, name: existing[0].name, fromDb: true });
+    }
+    toast(`${existing[0].name} found — added as sub`);
+  } else {
+    // Insert new inactive player
+    const { data: newPlayer, error } = await sb.from('players')
+      .insert({ name, active: false })
+      .select()
+      .single();
+    if (error) { toast('Error adding sub'); return; }
+    playerId = newPlayer.id;
+    subs.push({ id: playerId, name, fromDb: true });
+    toast(`${name} added as sub`);
+  }
+
+  if (!matchupOverrides[matchupId]) matchupOverrides[matchupId] = {};
+  matchupOverrides[matchupId][slot] = playerId;
+  loadAdminPanel();
 }
 
 function checkPw() {
@@ -849,18 +1323,42 @@ async function startRound() {
   const date=document.getElementById('adminDate').value;
   const msg=document.getElementById('startMsg');
   if(!courseId||!date){msg.textContent='Pick a course and date.';msg.className='admin-msg err';return;}
-  if(activeRound) await sb.from('rounds').update({status:'closed'}).eq('id',activeRound.id);
   const{error}=await sb.from('rounds').insert({season_id:activeSeason.id,course_id:courseId,date,status:'active'});
   if(error){msg.textContent='Error starting round.';msg.className='admin-msg err';}
   else{msg.textContent='Round started!';msg.className='admin-msg ok';await reloadRound();loadAdminPanel();toast('Round started ⛳');}
 }
 
-async function closeRound() {
-  if(!activeRound)return;
-  const msg=document.getElementById('closeMsg');
-  const{error}=await sb.from('rounds').update({status:'closed'}).eq('id',activeRound.id);
-  if(error){msg.textContent='Error closing round.';msg.className='admin-msg err';}
-  else{msg.textContent='Round closed.';msg.className='admin-msg ok';await reloadRound();loadAdminPanel();toast('Round closed.');}
+async function setDisplayRound() {
+  const id = document.getElementById('displayRoundSelect')?.value;
+  const msg = document.getElementById('displayMsg');
+  if(!id){return;}
+  const{error}=await sb.from('seasons').update({display_round_id:id}).eq('id',activeSeason.id);
+  if(error){msg.textContent='Error setting display round.';msg.className='admin-msg err';}
+  else{
+    activeSeason.display_round_id=id;
+    msg.textContent='Display round updated!';msg.className='admin-msg ok';
+    await reloadRound();loadAdminPanel();toast('Display round set ⛳');
+  }
+}
+
+async function closeRound(roundId) {
+  const msg = document.getElementById('closeMsg');
+  const{error}=await sb.from('rounds').update({status:'closed'}).eq('id',roundId);
+  if(error){toast('Error closing round.');}
+  else{
+    // If closed round was the display round, clear display_round_id
+    if(activeSeason.display_round_id===roundId){
+      await sb.from('seasons').update({display_round_id:null}).eq('id',activeSeason.id);
+      activeSeason.display_round_id=null;
+    }
+    await reloadRound();loadAdminPanel();toast('Round closed.');
+  }
+}
+
+async function reactivateRound(roundId) {
+  const{error}=await sb.from('rounds').update({status:'active'}).eq('id',roundId);
+  if(error){toast('Error reactivating round.');}
+  else{await reloadRound();loadAdminPanel();toast('Round reactivated ⛳');}
 }
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
