@@ -490,8 +490,6 @@ async function init() {
     activeSeason = seasons?.[0] || null;
     const { data: pl } = await sb.from('players').select('*').eq('active',true).order('name');
     players = pl || [];
-    const { data: pastSubs } = await sb.from('players').select('*').eq('active',false).order('name');
-    subs = (pastSubs || []).map(p => ({ id: p.id, name: p.name, fromDb: true }));
     const { data: tm } = await sb.from('teams').select('*').order('team_number');
     teams = tm || [];
     if (activeSeason) {
@@ -545,9 +543,10 @@ async function loadScores() {
   // Load matchups for this round
   const { data: mx } = await sb.from('matchups').select('*').eq('round_id',activeRound.id).order('created_at');
   matchups = mx || [];
-  // Sync into groupScores if group is active
+  // Sync into groupScores if group is active — preserve sub scores (not in Supabase)
   if (groupMode && selectedGroup.length>0) {
     selectedGroup.forEach(pid => {
+      if (pid.startsWith('sub_')) return;
       groupScores[pid] = { ...(scoreMap[pid]||{}) };
     });
   }
@@ -738,9 +737,8 @@ function getTeamDisplay(teamId, matchupId, slot) {
 
   const r1 = resolvePlayer(p1id);
   const r2 = resolvePlayer(p2id);
-  const isSubId = (id) => subs.some(s=>s.id===id) || !players.some(p=>p.id===id);
-  const n1 = r1 ? r1.player.name + (isSubId(pid1)?' <span class="sub-tag-inline">(Sub)</span>':'') : players.find(p=>p.id===t.player1_id)?.name || '?';
-  const n2 = r2 ? r2.player.name + (isSubId(pid2)?' <span class="sub-tag-inline">(Sub)</span>':'') : players.find(p=>p.id===t.player2_id)?.name || '?';
+  const n1 = r1 ? r1.player.name + (r1.isSub?' <span class="sub-tag-inline">(Sub)</span>':'') : players.find(p=>p.id===t.player1_id)?.name || '?';
+  const n2 = r2 ? r2.player.name + (r2.isSub?' <span class="sub-tag-inline">(Sub)</span>':'') : players.find(p=>p.id===t.player2_id)?.name || '?';
 
   // Use original team player if override can't be resolved
   const pid1 = r1 ? p1id : t.player1_id;
@@ -756,9 +754,13 @@ function selectMatchup(matchupId) {
   const t1 = getTeamDisplay(m.team1_id, matchupId, 1);
   const t2 = getTeamDisplay(m.team2_id, matchupId, 2);
   selectedGroup = [...t1.pids, ...t2.pids];
-  // Init groupScores from scoreMap
+  // Preserve sub scores, init others from scoreMap
   selectedGroup.forEach(pid => {
-    groupScores[pid] = { ...(scoreMap[pid]||{}) };
+    if (pid.startsWith('sub_')) {
+      if (!groupScores[pid]) groupScores[pid] = {};
+    } else {
+      groupScores[pid] = { ...(scoreMap[pid]||{}) };
+    }
   });
   groupMode = true;
   renderGroupScorecard();
@@ -770,10 +772,7 @@ let subs = []; // { id, name } — temp only, not in players array
 let matchupOverrides = {}; // { matchupId: { '1_p1': playerId, '1_p2': playerId, '2_p1': playerId, '2_p2': playerId } }
 
 function allSelectablePlayers() {
-  // Merge active players + subs, avoiding duplicates
-  const activeIds = new Set(players.map(p=>p.id));
-  const subsNotInActive = subs.filter(s=>!activeIds.has(s.id));
-  return [...players, ...subsNotInActive];
+  return [...players, ...subs];
 }
 
 function renderPlayerSelect() {
@@ -1014,21 +1013,25 @@ function popAdj(delta) {
 async function savePopover() {
   if (!groupScores[popPlayerId]) groupScores[popPlayerId]={};
   groupScores[popPlayerId][popHole] = popStrokes;
-  await sb.from('scores').upsert(
-    { round_id:activeRound.id, player_id:popPlayerId, hole:popHole, strokes:popStrokes },
-    { onConflict:'round_id,player_id,hole' }
-  );
+  if (!popPlayerId.startsWith('sub_')) {
+    await sb.from('scores').upsert(
+      { round_id:activeRound.id, player_id:popPlayerId, hole:popHole, strokes:popStrokes },
+      { onConflict:'round_id,player_id,hole' }
+    );
+  }
   dismissPopover();
   renderGroupScorecard();
 }
 
 async function clearScore() {
   if (groupScores[popPlayerId]) delete groupScores[popPlayerId][popHole];
-  await sb.from('scores')
-    .delete()
-    .eq('round_id', activeRound.id)
-    .eq('player_id', popPlayerId)
-    .eq('hole', popHole);
+  if (!popPlayerId.startsWith('sub_')) {
+    await sb.from('scores')
+      .delete()
+      .eq('round_id', activeRound.id)
+      .eq('player_id', popPlayerId)
+      .eq('hole', popHole);
+  }
   dismissPopover();
   renderGroupScorecard();
 }
@@ -1200,11 +1203,6 @@ async function loadAdminPanel() {
       + overrideSection
     : '';
 
-  const pastSubsHtml = subs.length > 0
-    ? '<div style="font-size:12px;color:#aaa;margin-bottom:10px;">Players who have subbed previously</div>' +
-      subs.map(s=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0ebe0;"><span style="font-size:14px;font-weight:600;color:#1a3a2a;">'+s.name+'</span><span style="font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:0.06em;">Sub</span></div>').join('')
-    : '<div style="font-size:13px;color:#aaa;">No past subs yet.</div>';
-
   panel.innerHTML=`
     <div class="admin-card">
       <h3>Start New Round</h3>
@@ -1227,10 +1225,6 @@ async function loadAdminPanel() {
     <div class="admin-card">
       <h3>Closed Rounds</h3>
       ${closedRoundsList}
-    </div>
-    <div class="admin-card">
-      <h3>Past Subs</h3>
-      ${pastSubsHtml}
     </div>
     ${activeRoundSection}`;
 }
@@ -1272,41 +1266,17 @@ function setOverride(matchupId, slot, playerId) {
   matchupOverrides[matchupId][slot] = playerId;
 }
 
-async function confirmSub(matchupId, slot) {
+function confirmSub(matchupId, slot) {
   const field = document.getElementById(`subInputField_${matchupId}_${slot}`);
   if (!field) return;
   const name = field.value.trim();
   if (!name) return;
-
-  // Check if player already exists (active or inactive)
-  const { data: existing } = await sb.from('players')
-    .select('*')
-    .ilike('name', name)
-    .limit(1);
-
-  let playerId;
-  if (existing && existing.length > 0) {
-    // Reuse existing record
-    playerId = existing[0].id;
-    if (!subs.some(s => s.id === playerId)) {
-      subs.push({ id: playerId, name: existing[0].name, fromDb: true });
-    }
-    toast(`${existing[0].name} found — added as sub`);
-  } else {
-    // Insert new inactive player
-    const { data: newPlayer, error } = await sb.from('players')
-      .insert({ name, active: false })
-      .select()
-      .single();
-    if (error) { toast('Error adding sub'); return; }
-    playerId = newPlayer.id;
-    subs.push({ id: playerId, name, fromDb: true });
-    toast(`${name} added as sub`);
-  }
-
+  const id = 'sub_' + Date.now();
+  subs.push({ id, name });
   if (!matchupOverrides[matchupId]) matchupOverrides[matchupId] = {};
-  matchupOverrides[matchupId][slot] = playerId;
+  matchupOverrides[matchupId][slot] = id;
   loadAdminPanel();
+  toast(`${name} added as sub`);
 }
 
 function checkPw() {
