@@ -1192,6 +1192,14 @@ async function loadAdminPanel() {
     overrideSection = `<div class="admin-card"><h3>Edit Matchup Players</h3><p style="font-size:12px;color:#aaa;margin-bottom:12px;">Swap in subs or fix player assignments</p>${overrideRows}</div>`;
   }
 
+  const activeRoundSection = activeRound
+    ? '<div class="admin-card"><h3>Set Matchups</h3><p style="font-size:12px;color:#aaa;margin-bottom:12px;">Set the 6 matchups for the active round</p>'
+      + matchupSetupRows
+      + '<button class="btn-full" onclick="saveMatchups()">Save Matchups</button>'
+      + '<div class="admin-msg" id="matchupMsg"></div></div>'
+      + overrideSection
+    : '';
+
   const pastSubsHtml = subs.length > 0
     ? '<div style="font-size:12px;color:#aaa;margin-bottom:10px;">Players who have subbed previously</div>' +
       subs.map(s=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0ebe0;"><span style="font-size:14px;font-weight:600;color:#1a3a2a;">'+s.name+'</span><span style="font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:0.06em;">Sub</span></div>').join('')
@@ -1224,15 +1232,7 @@ async function loadAdminPanel() {
       <h3>Past Subs</h3>
       ${pastSubsHtml}
     </div>
-    ${activeRound ? `
-    <div class="admin-card">
-      <h3>Set Matchups</h3>
-      <p style="font-size:12px;color:#aaa;margin-bottom:12px;">Set the 6 matchups for the active round</p>
-      ${matchupSetupRows}
-      <button class="btn-full" onclick="saveMatchups()">Save Matchups</button>
-      <div class="admin-msg" id="matchupMsg"></div>
-    </div>
-    ${overrideSection}` : ''}`;
+    ${activeRoundSection}`;
 }
 
 async function saveMatchups() {
