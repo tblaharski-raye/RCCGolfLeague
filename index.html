@@ -1268,17 +1268,37 @@ function setOverride(matchupId, slot, playerId) {
   matchupOverrides[matchupId][slot] = playerId;
 }
 
-function confirmSub(matchupId, slot) {
+async function confirmSub(matchupId, slot) {
   const field = document.getElementById(`subInputField_${matchupId}_${slot}`);
   if (!field) return;
   const name = field.value.trim();
   if (!name) return;
-  const id = 'sub_' + Date.now();
-  subs.push({ id, name });
+
+  let playerId;
+
+  // Check if player already exists (active or inactive)
+  const { data: existing } = await sb.from('players').select('*').ilike('name', name).limit(1);
+
+  if (existing && existing.length > 0) {
+    playerId = existing[0].id;
+    if (!subs.some(s => s.id === playerId)) {
+      subs.push({ id: playerId, name: existing[0].name, fromDb: true });
+    }
+    toast(existing[0].name + ' found — added as sub');
+  } else {
+    const { data: newPlayer, error } = await sb.from('players')
+      .insert({ name, active: false })
+      .select()
+      .single();
+    if (error) { toast('Error adding sub'); return; }
+    playerId = newPlayer.id;
+    subs.push({ id: playerId, name, fromDb: true });
+    toast(name + ' added as sub');
+  }
+
   if (!matchupOverrides[matchupId]) matchupOverrides[matchupId] = {};
-  matchupOverrides[matchupId][slot] = id;
+  matchupOverrides[matchupId][slot] = playerId;
   loadAdminPanel();
-  toast(`${name} added as sub`);
 }
 
 function checkPw() {
