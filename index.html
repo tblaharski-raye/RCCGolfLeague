@@ -592,7 +592,9 @@ function renderScoreboard() {
     el.innerHTML=`<div class="no-round-card"><div class="icon">⛳</div><h3>No Active Round</h3><p>Head to the Admin tab to start this week's round.</p></div>`;
     return;
   }
-  const withScores = players.filter(p=>scoreMap[p.id]&&Object.keys(scoreMap[p.id]).length>0);
+  const subPlayers = subs.filter(s=>s.fromDb).map(s=>({ id:s.id, name:s.name }));
+  const allPlayers = [...players, ...subPlayers.filter(s=>!players.some(p=>p.id===s.id))];
+  const withScores = allPlayers.filter(p=>scoreMap[p.id]&&Object.keys(scoreMap[p.id]).length>0);
   const rows = withScores.map(p=>{
     const holes=scoreMap[p.id]||{};
     const arr=pars().map((_,i)=>holes[i+1]??null);
