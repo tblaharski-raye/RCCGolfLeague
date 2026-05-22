@@ -1015,7 +1015,8 @@ function popAdj(delta) {
 async function savePopover() {
   if (!groupScores[popPlayerId]) groupScores[popPlayerId]={};
   groupScores[popPlayerId][popHole] = popStrokes;
-  if (!popPlayerId.startsWith('sub_')) {
+  const isInMemorySub = popPlayerId.startsWith('sub_') && !subs.some(s=>s.id===popPlayerId&&s.fromDb);
+  if (!isInMemorySub) {
     await sb.from('scores').upsert(
       { round_id:activeRound.id, player_id:popPlayerId, hole:popHole, strokes:popStrokes },
       { onConflict:'round_id,player_id,hole' }
@@ -1027,7 +1028,8 @@ async function savePopover() {
 
 async function clearScore() {
   if (groupScores[popPlayerId]) delete groupScores[popPlayerId][popHole];
-  if (!popPlayerId.startsWith('sub_')) {
+  const isInMemorySubClear = popPlayerId.startsWith('sub_') && !subs.some(s=>s.id===popPlayerId&&s.fromDb);
+  if (!isInMemorySubClear) {
     await sb.from('scores')
       .delete()
       .eq('round_id', activeRound.id)
