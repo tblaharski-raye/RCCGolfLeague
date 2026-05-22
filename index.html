@@ -722,18 +722,21 @@ function getTeamNumber(teamId) {
 }
 
 function getTeamDisplay(teamId, matchupId, slot) {
-  const overrides = matchupOverrides[matchupId] || {};
+  const memOverrides = matchupOverrides[matchupId] || {};
   const t = teams.find(t=>t.id===teamId);
   if(!t) return { names:'Unknown', pids:[] };
 
-  const p1id = overrides[`${slot}_p1`] || t.player1_id;
-  const p2id = overrides[`${slot}_p2`] || t.player2_id;
+  // Priority: in-memory override → DB override → team default
+  const mx = matchups.find(m=>m.id===matchupId);
+  const dbP1 = slot===1 ? mx?.team1_p1_override : mx?.team2_p1_override;
+  const dbP2 = slot===1 ? mx?.team1_p2_override : mx?.team2_p2_override;
+
+  const p1id = memOverrides[`${slot}_p1`] || dbP1 || t.player1_id;
+  const p2id = memOverrides[`${slot}_p2`] || dbP2 || t.player2_id;
 
   const resolvePlayer = (pid) => {
-    // Check players first
     let p = players.find(p=>p.id===pid);
     if(p) return { player: p, isSub: false };
-    // Check subs
     let s = subs.find(s=>s.id===pid);
     if(s) return { player: s, isSub: true };
     return null;
@@ -741,10 +744,10 @@ function getTeamDisplay(teamId, matchupId, slot) {
 
   const r1 = resolvePlayer(p1id);
   const r2 = resolvePlayer(p2id);
-  const n1 = r1 ? r1.player.name + (r1.isSub?' <span class="sub-tag-inline">(Sub)</span>':'') : players.find(p=>p.id===t.player1_id)?.name || '?';
-  const n2 = r2 ? r2.player.name + (r2.isSub?' <span class="sub-tag-inline">(Sub)</span>':'') : players.find(p=>p.id===t.player2_id)?.name || '?';
+  const isSubId = (pid) => !players.some(p=>p.id===pid);
+  const n1 = r1 ? r1.player.name + (isSubId(p1id)?' <span class="sub-tag-inline">(Sub)</span>':'') : players.find(p=>p.id===t.player1_id)?.name || '?';
+  const n2 = r2 ? r2.player.name + (isSubId(p2id)?' <span class="sub-tag-inline">(Sub)</span>':'') : players.find(p=>p.id===t.player2_id)?.name || '?';
 
-  // Use original team player if override can't be resolved
   const pid1 = r1 ? p1id : t.player1_id;
   const pid2 = r2 ? p2id : t.player2_id;
 
@@ -1196,6 +1199,7 @@ async function loadAdminPanel() {
         ${makeRow('1_p2', t1.player2_id, p2?p2.name:'Player 2')}
         ${makeRow('2_p1', t2.player1_id, p3?p3.name:'Player 3')}
         ${makeRow('2_p2', t2.player2_id, p4?p4.name:'Player 4')}
+        <button class="btn-full" style="margin-top:12px;" onclick="saveMatchupOverrides('${m.id}')">Save Changes</button>
       </div>`;
     }).join('');
     overrideSection = `<div class="admin-card"><h3>Edit Matchup Players</h3><p style="font-size:12px;color:#aaa;margin-bottom:12px;">Swap in subs or fix player assignments</p>${overrideRows}</div>`;
@@ -1302,6 +1306,38 @@ async function confirmSub(matchupId, slot) {
 
   if (!matchupOverrides[matchupId]) matchupOverrides[matchupId] = {};
   matchupOverrides[matchupId][slot] = playerId;
+  loadAdminPanel();
+}
+
+async function saveMatchupOverrides(matchupId) {
+  const ov = matchupOverrides[matchupId] || {};
+  const mx = matchups.find(m=>m.id===matchupId);
+  if(!mx) return;
+
+  const t1 = teams.find(t=>t.id===mx.team1_id);
+  const t2 = teams.find(t=>t.id===mx.team2_id);
+
+  const updates = {
+    team1_p1_override: ov['1_p1'] || null,
+    team1_p2_override: ov['1_p2'] || null,
+    team2_p1_override: ov['2_p1'] || null,
+    team2_p2_override: ov['2_p2'] || null,
+  };
+
+  // Only set override if it differs from team default
+  if(!updates.team1_p1_override || updates.team1_p1_override===t1?.player1_id) updates.team1_p1_override=null;
+  if(!updates.team1_p2_override || updates.team1_p2_override===t1?.player2_id) updates.team1_p2_override=null;
+  if(!updates.team2_p1_override || updates.team2_p1_override===t2?.player1_id) updates.team2_p1_override=null;
+  if(!updates.team2_p2_override || updates.team2_p2_override===t2?.player2_id) updates.team2_p2_override=null;
+
+  const { error } = await sb.from('matchups').update(updates).eq('id', matchupId);
+  if(error) { toast('Error saving changes'); return; }
+
+  // Update local matchups array
+  const idx = matchups.findIndex(m=>m.id===matchupId);
+  if(idx>-1) matchups[idx] = { ...matchups[idx], ...updates };
+
+  toast('Matchup saved ✓');
   loadAdminPanel();
 }
 
