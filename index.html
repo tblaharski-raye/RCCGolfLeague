@@ -634,7 +634,8 @@ async function loadScores() {
     scoreMap[s.player_id][s.hole] = s.strokes;
   });
   const { data: mx } = await sb.from('matchups').select('*').eq('round_id',activeRound.id).order('created_at');
-  matchups = mx || [];
+  const seen = new Set();
+  matchups = (mx||[]).filter(m => { if(seen.has(m.id)) return false; seen.add(m.id); return true; });
   if (groupMode && selectedGroup.length>0) {
     selectedGroup.forEach(pid => {
       if (pid.startsWith('sub_')) return;
